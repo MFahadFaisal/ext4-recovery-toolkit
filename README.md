@@ -130,15 +130,97 @@ gcc -o carve_blocks src/carve_blocks.c
 Both test images and their exact creation steps are documented in
 `tests/README.md` for full reproducibility.
 
+## Phase 5 — jbd2 Journal Parsing (Deleted Inode Recovery)
+
+Parses the ext4 journal (inode 8, jbd2 format) directly from raw blocks —
+no `jbd2` kernel code or Sleuth Kit journal tools involved. All journal
+metadata (headers, superblock, descriptor tags) is **big-endian**, unlike
+the rest of ext4, which is a common gotcha when implementing this from
+scratch.
+
+### Approach
+
+1. Locate the journal's physical blocks via inode 8's extent tree
+   (`debugfs -R "stat <8>"` confirms; the tool currently hard-codes this
+   and reads it dynamically as a planned refinement).
+2. Read journal block 0 as the journal superblock (`jbd2_scan.c`) —
+   confirms block size, max length, and current sequence number.
+3. Scan every subsequent block's 12-byte header to classify it as a
+   descriptor, commit, or revoke block.
+4. Parse descriptor block tags (`jbd2_tags.c`) — each 16-byte
+   `journal_checksum_v3`-format tag says "the next journal data block is a
+   backup of real filesystem block N."
+5. If a descriptor tag points at the real inode-table block containing a
+   deleted file's inode, extract and parse the corresponding journal data
+   block as an inode table (`jbd2_extract_inode.c`) — if this snapshot
+   predates the delete transaction, the inode's extent tree may still be
+   intact, even though the live on-disk inode has been zeroed.
+
+### Findings
+
+**Negative case (`test.img`):** create + delete happened within the same
+short shell session, with no `sync` in between. Both transactions were
+almost certainly coalesced into a single journal commit (only one
+descriptor/commit pair, sequence 2, existed for the whole session).
+Extracting the journal's copy of the inode table showed the **already
+truncated** state — there was no historical "pre-delete" snapshot to
+recover, because nothing forced a commit boundary before the delete
+happened. Root cause is identical to the Phase 4b negative case: no forced
+durability point between creation and deletion.
+
+**Positive case (`test3.img`):** added an explicit `sync` after file
+creation and *before* deletion, forcing two separate journal transactions
+(sequence 2 = create, sequence 3 = delete). Extracting the inode from
+sequence 2's journal data block recovered a **fully intact pre-truncate
+inode**:
+
+i_size_lo: 29
+i_links_count: 1
+i_dtime: 0
+i_flags: 0x80000 (EXTENTS)
+Extent 0: logical_block=0 len=1 -> physical_block=32769
+
+Reading physical block 32769 directly recovered the original file content
+byte-for-byte (`journal recovery target file`), despite the live inode on
+disk being fully zeroed (`i_size=0`, `dtime` set, empty extent tree). This
+is a genuine recovery of data that no longer exists anywhere in the live
+filesystem structures — the only surviving copy was the stale-but-not-yet-
+overwritten journal transaction.
+
+### Cross-cutting takeaway across Phases 3-5
+
+All three independent recovery techniques (inode inspection, directory
+slack, journal replay) fail identically whenever an entire
+create-then-delete sequence happens inside one write-behind/journal-commit
+window with no forced sync boundary. Recoverability isn't primarily a
+question of parser sophistication — it's a question of **filesystem
+transaction timing**. This is a real and useful anti-forensic insight, not
+just a limitation of this specific tool: an attacker or user who
+creates-and-deletes quickly, without triggering an fsync, leaves
+substantially less recoverable trace across every layer of ext4 at once.
+
+### Validation Summary (updated)
+
+| Phase | Technique | Cross-checked against | Result |
+|---|---|---|---|
+| 1 | Superblock parse | `dumpe2fs -h` | Exact match |
+| 2 | Group descriptor parse | `dumpe2fs` | Exact match |
+| 3 | Deleted inode detection | `ils -O`, `debugfs stat` | Exact match (both tools hit the same truncation wall) |
+| 4a | Directory slack scan | `fls -d` | Both fail identically on `metadata_csum` fs |
+| 4b | Block carving | `blkls` + `strings` | Byte-identical content recovered (when data was synced pre-delete) |
+| 5 | Journal (jbd2) replay | `debugfs`, manual hex verification | Byte-identical pre-truncate inode + content recovered (when a commit boundary separated create/delete) |
+
 ## Next Steps (in progress)
 
-- **Phase 5:** jbd2 journal parsing — recovering pre-truncate inode copies
-  (with intact extent trees) from committed-but-not-yet-checkpointed
-  journal transactions, the "proper" recovery path for cases like `test.img`
-  where content never touched non-journal disk space.
+- **Automate journal scanning** — currently requires manually feeding
+  descriptor/data block numbers; next iteration will auto-walk all
+  descriptor blocks, cross-reference against known deleted inode numbers
+  from Phase 3, and attempt recovery automatically for each.
 - **NTFS support** — same methodology applied to MFT parsing.
 - **Super-timeline tool** — merging inode/MFT timestamps, journal entries,
   and system logs into a unified timeline (mini-Plaso).
+
+
 
 
 
