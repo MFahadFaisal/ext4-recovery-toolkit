@@ -210,15 +210,30 @@ substantially less recoverable trace across every layer of ext4 at once.
 | 4b | Block carving | `blkls` + `strings` | Byte-identical content recovered (when data was synced pre-delete) |
 | 5 | Journal (jbd2) replay | `debugfs`, manual hex verification | Byte-identical pre-truncate inode + content recovered (when a commit boundary separated create/delete) |
 
-## Next Steps (in progress)
+## Phase 5.5 — Automated Recovery Pipeline (`journal_recover.c`)
 
-- **Automate journal scanning** — currently requires manually feeding
-  descriptor/data block numbers; next iteration will auto-walk all
-  descriptor blocks, cross-reference against known deleted inode numbers
-  from Phase 3, and attempt recovery automatically for each.
-- **NTFS support** — same methodology applied to MFT parsing.
-- **Super-timeline tool** — merging inode/MFT timestamps, journal entries,
-  and system logs into a unified timeline (mini-Plaso).
+Combines Phases 3 and 5 into a single tool requiring no manual block
+lookups:
+
+1. Scans the live filesystem for deleted inode candidates (Phase 3 logic).
+2. Dynamically locates the journal via inode 8's extent tree (no
+   hard-coded block numbers).
+3. Walks every descriptor block across every transaction in the journal,
+   cross-referencing tagged real-block numbers against the inode-table
+   blocks of known deleted inodes.
+4. For any match, extracts the journal's copy of that inode and checks
+   whether it predates truncation (`i_dtime == 0`, `i_links_count > 0`,
+   `i_size_lo > 0`). If so, walks its extent tree and writes recovered
+   content directly to `recovered_journal/`.
+
+Validated against both test images: correctly reports "already truncated"
+for every transaction on `test.img` (matching the manual Phase 5 finding),
+and on `test3.img` automatically distinguishes between transaction
+sequence 2 (pre-truncate, recoverable — content extracted byte-for-byte)
+and sequence 3 (post-truncate, correctly rejected), with zero manual
+intervention.
+
+
 
 
 
