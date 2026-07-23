@@ -13,5 +13,6 @@ src/all_unallocated.bin
 *.o
 tests/test.img
 tests/test2.img
+tests/test3.img
 src/all_unallocated.bin
 
