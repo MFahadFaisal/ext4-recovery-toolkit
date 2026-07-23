@@ -11,3 +11,7 @@ src/all_unallocated.bin
 
 # misc
 *.o
+tests/test.img
+tests/test2.img
+src/all_unallocated.bin
+
