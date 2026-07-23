@@ -1,0 +1,13 @@
+# compiled binaries
+superblock
+group_desc
+inode_scan
+dir_scan
+carve_blocks
+
+# recovered output (regenerate via carve_blocks, don't commit binary carved data)
+src/recovered/
+src/all_unallocated.bin
+
+# misc
+*.o
