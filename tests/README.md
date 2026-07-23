@@ -29,4 +29,17 @@ sudo umount /tmp/mnt2
 \`\`\`
 
 
+## test3.img — journal recovery positive case (synced commit boundary before delete)
 
+\`\`\`bash
+dd if=/dev/zero of=test3.img bs=1M count=64
+mkfs.ext4 -F test3.img
+mkdir -p /tmp/mnt3
+sudo mount -o loop test3.img /tmp/mnt3
+sudo bash -c 'echo "journal recovery target file" > /tmp/mnt3/journal_target.txt'
+sudo sync
+sleep 1
+sudo rm /tmp/mnt3/journal_target.txt
+sudo sync
+sudo umount /tmp/mnt3
+\`\`\`
