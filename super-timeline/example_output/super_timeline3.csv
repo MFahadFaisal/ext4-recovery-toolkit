@@ -1,0 +1,20 @@
+date,time,timezone,macb,source,sourcetype,type,description,inode
+07/23/2026,09:06:35,UTC,A...,FILE,ext4 inode,Last Access Time,"inode 2 (size=1024, links=3, mode=16877)",2
+07/23/2026,09:06:35,UTC,...B,FILE,ext4 inode,Creation (Birth) Time,"inode 2 (size=1024, links=3, mode=16877)",2
+07/23/2026,09:06:35,UTC,A...,FILE,ext4 inode,Last Access Time,"inode 11 (size=12288, links=2, mode=16832)",11
+07/23/2026,09:06:35,UTC,.M..,FILE,ext4 inode,Content Modification Time,"inode 11 (size=12288, links=2, mode=16832)",11
+07/23/2026,09:06:35,UTC,..C.,FILE,ext4 inode,Inode/Metadata Change Time,"inode 11 (size=12288, links=2, mode=16832)",11
+07/23/2026,09:06:35,UTC,...B,FILE,ext4 inode,Creation (Birth) Time,"inode 11 (size=12288, links=2, mode=16832)",11
+07/23/2026,09:06:35,UTC,A...,FILE,ext4 inode,Last Access Time,"inode 12 (size=32768, links=1, mode=33152)",12
+07/23/2026,09:06:35,UTC,.M..,FILE,ext4 inode,Content Modification Time,"inode 12 (size=32768, links=1, mode=33152)",12
+07/23/2026,09:06:35,UTC,..C.,FILE,ext4 inode,Inode/Metadata Change Time,"inode 12 (size=32768, links=1, mode=33152)",12
+07/23/2026,09:06:35,UTC,...B,FILE,ext4 inode,Creation (Birth) Time,"inode 12 (size=32768, links=1, mode=33152)",12
+07/23/2026,09:06:36,UTC,A...,FILE,ext4 inode,Last Access Time,"inode 13 (size=0, links=0, mode=33188)",13
+07/23/2026,09:06:36,UTC,...B,FILE,ext4 inode,Creation (Birth) Time,"inode 13 (size=0, links=0, mode=33188)",13
+07/23/2026,09:06:36,UTC,....,JOURNAL,jbd2 commit,Transaction Commit,journal transaction seq=2 committed (block 16394),
+07/23/2026,09:06:37,UTC,.M..,FILE,ext4 inode,Content Modification Time,"inode 2 (size=1024, links=3, mode=16877)",2
+07/23/2026,09:06:37,UTC,..C.,FILE,ext4 inode,Inode/Metadata Change Time,"inode 2 (size=1024, links=3, mode=16877)",2
+07/23/2026,09:06:37,UTC,.M..,FILE,ext4 inode,Content Modification Time,"inode 13 (size=0, links=0, mode=33188)",13
+07/23/2026,09:06:37,UTC,..C.,FILE,ext4 inode,Inode/Metadata Change Time,"inode 13 (size=0, links=0, mode=33188)",13
+07/23/2026,09:06:37,UTC,..D.,FILE,ext4 inode,Deletion Time,"inode 13 (size=0, links=0, mode=33188)",13
+07/23/2026,09:06:37,UTC,....,JOURNAL,jbd2 commit,Transaction Commit,journal transaction seq=3 committed (block 16403),

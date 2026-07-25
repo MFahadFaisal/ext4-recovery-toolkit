@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ext4_structs.h"
+#include "../common/ext4_structs.h"
 #include "ext4_dirent.h"
 
 const char* filetype_str(uint8_t t) {

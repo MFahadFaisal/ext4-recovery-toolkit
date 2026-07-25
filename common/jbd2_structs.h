@@ -44,10 +44,27 @@ static inline uint32_t be32(uint32_t val) {
 
 // journal_checksum_v3 tag format (16 bytes, big-endian fields)
 typedef struct {
-    uint32_t t_blocknr;       // low 32 bits: which real FS block this data block backs up
+    uint32_t t_blocknr;
     uint32_t t_flags;
-    uint32_t t_blocknr_high;  // high 32 bits (for 64bit feature)
+    uint32_t t_blocknr_high;
     uint32_t t_checksum;
 } __attribute__((packed)) journal_block_tag3_t;
-#endif
 
+// Commit block header (follows the 12-byte journal_header_t)
+typedef struct {
+    journal_header_t h_header;
+    uint8_t  h_chksum_type;
+    uint8_t  h_chksum_size;
+    uint8_t  h_padding[2];
+    uint32_t h_chksum[8];
+    uint64_t h_commit_sec;
+    uint32_t h_commit_nsec;
+} __attribute__((packed)) commit_header_t;
+
+static inline uint64_t be64(uint64_t val) {
+    uint32_t hi = (uint32_t)(val >> 32);
+    uint32_t lo = (uint32_t)(val & 0xFFFFFFFF);
+    return ((uint64_t)be32(lo) << 32) | be32(hi);
+}
+
+#endif

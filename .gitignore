@@ -16,3 +16,12 @@ tests/test2.img
 tests/test3.img
 src/all_unallocated.bin
 
+# compiled binaries (super-timeline)
+super-timeline/src/ext4_timestamps
+super-timeline/src/journal_timeline
+
+# generated CSVs (regenerate via the tool)
+super-timeline/src/*.csv
+
+
+

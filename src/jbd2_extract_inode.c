@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "ext4_structs.h"
-#include "ext4_inode.h"
+#include "../common/ext4_structs.h"
+#include "../common/ext4_inode.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 4) {

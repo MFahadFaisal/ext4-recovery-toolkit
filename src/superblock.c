@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ext4_structs.h"
+#include "../common/ext4_structs.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {

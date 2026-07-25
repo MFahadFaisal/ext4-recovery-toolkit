@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ext4_structs.h"
+#include "../common/ext4_structs.h"
 
 // 64-byte version (32-byte classic + 32-byte hi fields if 64bit feature is set)
 typedef struct {

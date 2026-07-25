@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "ext4_structs.h"
+#include "../common/ext4_structs.h"
 
 typedef struct {
     uint32_t bg_block_bitmap_lo;

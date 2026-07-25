@@ -1,3 +1,20 @@
+# ext4 Forensics Toolkit
+
+Two from-scratch C/Python tools for ext4 forensic analysis, built without
+relying on Sleuth Kit or any existing forensics library, and independently
+validated against Sleuth Kit at every phase.
+
+- **`src/`** — deleted file recovery (superblock/group-desc/inode parsing,
+  directory slack analysis, unallocated block carving, jbd2 journal replay)
+- **`super-timeline/`** — super-timeline tool merging ext4 inode timestamps
+  and jbd2 journal commit timestamps into one chronologically-sorted,
+  cross-source-corroborated timeline (l2tcsv-style output)
+- **`common/`** — shared on-disk struct definitions (superblock, inode,
+  group descriptor, jbd2) used by both tools
+
+See each subfolder's README for full methodology, findings, and
+validation details.
+
 # ext4 Deleted File Recovery Tool (from scratch, no Sleuth Kit)
 
 A from-scratch C implementation of ext4 filesystem parsing and deleted-file
