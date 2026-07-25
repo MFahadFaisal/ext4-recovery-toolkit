@@ -122,6 +122,49 @@ bounded by (a) whether data was ever flushed to disk, and (b) whether you
 know the true byte length of the file (partial final blocks are hard to
 detect on printable-ratio heuristics alone).
 
+
+## Phase 4b v2 — Signature-Based, Run-Aware, Padding-Aware Carving (`carve_blocks_v2.c`)
+
+Rebuilt the carver to address every limitation found in the original
+(`carve_blocks.c`):
+
+1. **File-signature detection** (PNG, JPEG, PDF, ZIP, GIF magic bytes with
+   known footers) takes priority over the text heuristic, carving
+   header-to-footer in one pass — matching the technique real tools like
+   Foremost/Scalpel use, implemented from scratch. No binary file types
+   were present in the test images, so this path is implemented and
+   unit-verified via magic-byte matching, but not yet exercised
+   end-to-end; a good next addition is a test image with an embedded
+   JPEG/PDF.
+
+2. **Localized run-scanning**: the original carver classified each free
+   block in isolation, and a naive "classify the whole free run" approach
+   (tried and rejected during development) failed when small files sat
+   inside much larger contiguous free regions — confirmed via debug
+   instrumentation showing a 15-block target diluted inside a 4096-block
+   free run, well past the text heuristic's printable-ratio threshold.
+   The fix slides through each free run block-by-block, starts capturing
+   at the first qualifying block, and extends only while subsequent
+   blocks keep qualifying.
+
+3. **Padding-aware text judgment and trimming**: the original heuristic
+   judged printable-ratio across an entire block including trailing
+   zero-padding, which caused two failures — partially-filled final
+   blocks of multi-block files were excluded (confirmed: `test2.img`'s
+   500-line file was missing its final line), and small files entirely
+   contained in one block with heavy padding were missed outright
+   (confirmed: `test3.img`'s 29-byte file, ~3% printable across the full
+   block, failed the check entirely). Fixed by judging the printable
+   ratio only up to the start of trailing null-padding, and trimming that
+   padding from the written output.
+
+**Validated result:** both previously-documented limitations are now
+fully resolved — `diff` against ground truth for both a 16-block file
+(`test2.img`, previously missing its final line) and a 1-block file
+(`test3.img`, previously missed entirely) shows **zero byte differences**
+in both cases, with zero manual reassembly required in either case.
+
+
 ## Validation Summary
 
 | Phase | Technique | Cross-checked against | Result |
